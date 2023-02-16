@@ -58,7 +58,7 @@ class PromGauge(object):
 
     def set(self, metric_name: str, value: int = 1):
         if self.is_metric_exist(metric_name) is True:
-            print("set value for metrics: ", value)
+            # print("set value for metrics: ", value)
             self.gauge_metrics[metric_name].set(value)
 
 

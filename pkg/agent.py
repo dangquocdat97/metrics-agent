@@ -6,8 +6,6 @@ from pkg.prometheus import Prom, new_prom
 from pkg import constant
 
 
-
-
 class Agent(threading.Thread):
     def __init__(self, metrics_psutil: MetricsPsutil, prom: Prom):
         super().__init__()
@@ -24,14 +22,18 @@ class Agent(threading.Thread):
 
     # temporary hardcode for specific metrics
     def collect_metrics(self):
+
         metrics = self.get_metrics()
+        print("get metrics: ", metrics)
         cpu_usage = metrics.get(constant.CPU_USAGE, 0)
         mem_usage = metrics.get(constant.MEM_USAGE, 0)
+        print("set metrics for prometheus")
         self.prom.prom_gauge.set(constant.CPU_USAGE, cpu_usage)
         self.prom.prom_gauge.set(constant.MEM_USAGE, mem_usage)
 
     def run(self):
         while True:
+            # print("collect agent")
             self.collect_metrics()
             time.sleep(2)
 
@@ -42,7 +44,8 @@ def create_new_agent() -> Agent:
     return Agent(metrics_psutil=metrics, prom=prom)
 
 
-def init_agent():
+def init_agent() -> Agent:
     agent = create_new_agent()
     agent.insert_new_metrics_for_monitor()
+    return agent
 
