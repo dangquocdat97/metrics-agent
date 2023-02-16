@@ -17,8 +17,8 @@ class Agent(threading.Thread):
 
     # temporary hardcode for specific metrics
     def insert_new_metrics_for_monitor(self):
-        self.prom.prom_gauge.insert_new_metric(name_metric=constant.CPU_USAGE, description=constant.CPU_USAGE_DOCS)
-        self.prom.prom_gauge.insert_new_metric(name_metric=constant.MEM_USAGE, description=constant.MEM_USAGE_DOCS)
+        self.prom.prom_gauge.insert_new_metric(metric_name=constant.CPU_USAGE, description=constant.CPU_USAGE_DOCS)
+        self.prom.prom_gauge.insert_new_metric(metric_name=constant.MEM_USAGE, description=constant.MEM_USAGE_DOCS)
 
     # temporary hardcode for specific metrics
     def collect_metrics(self):
