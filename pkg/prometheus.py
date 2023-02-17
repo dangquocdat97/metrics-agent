@@ -8,6 +8,10 @@ class PromBase(object):
         self.metrics: Dict[str, Union[Counter, Gauge]] = {}
 
     @staticmethod
+    def _encode_metrics_name(process_name, metric_type: str) -> str:
+        return constant.PROJECT_NAME+"_"+process_name+"_"+metric_type
+
+    @staticmethod
     def _create_metric(metric_name, description) -> Union[Counter, Gauge]:
         pass
 
@@ -16,7 +20,8 @@ class PromBase(object):
             return True
         return False
 
-    def insert_new_metric(self, metric_name: str, description: str):
+    def insert_new_metric(self, process_name, metric_name, description: str):
+        metric_name = self._encode_metrics_name(process_name, metric_name)
         if self.is_metric_exist(metric_name) is False:
             self.metrics[metric_name] = self._create_metric(metric_name, description)
             return
