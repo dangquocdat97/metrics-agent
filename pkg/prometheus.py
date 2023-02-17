@@ -27,7 +27,8 @@ class PromBase(object):
             return
         print("Metrics is existed")
 
-    def inc(self, metric_name: str, value: int):
+    def inc(self, process_name:str, metric_name: str, value: int):
+        metric_name = self._encode_metrics_name(process_name, metric_name)
         if self.is_metric_exist(metric_name) is True:
             self.metrics[metric_name].inc(value)
 
@@ -51,11 +52,13 @@ class PromGauge(PromBase):
     def _create_metric(metric_name, description) -> Union[Counter, Gauge]:
         return Gauge(name=metric_name, documentation=description)
 
-    def dec(self, metric_name: str, value: int = 1):
+    def dec(self, process_name: str, metric_name: str, value: int = 1):
+        metric_name = self._encode_metrics_name(process_name, metric_name)
         if self.is_metric_exist(metric_name) is True:
             self.metrics[metric_name].dec(value)
 
-    def set(self, metric_name: str, value: int = 1):
+    def set(self, process_name: str, metric_name: str, value: int = 1):
+        metric_name = self._encode_metrics_name(process_name, metric_name)
         if self.is_metric_exist(metric_name) is True:
             # print("set value for metrics: ", value)
             self.metrics[metric_name].set(value)

@@ -34,7 +34,7 @@ class Agent(threading.Thread):
             metric_name = metric.get("metric_name")
             usage = data.get(metric_name, 0)
 
-            self.prom.prom_gauge.set(metric_name, usage)
+            self.prom.prom_gauge.set(process_name=proc.name, metric_name=metric_name, value=usage)
 
     def add_proc(self, proc: ProcPsutil):
         self.list_proc.append(proc)
