@@ -1,9 +1,11 @@
 import os
-from typing import Type, Dict
+from typing import Type, Dict, List
 import psutil
 from pkg import constant
 
 
+# Handle for Process management
+############################################################
 class ProcPsutil(object):
     def __init__(self, psutil_process: psutil.Process, proc_name: str):
         self.proc = psutil_process
@@ -50,3 +52,23 @@ def find_proc_by_cmd(cmd: list) -> Type[psutil.Process]:
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             print("type of: ", type(psutil.Process))
             return psutil.Process
+
+# Handle for base psutil
+############################################################
+
+
+class BasePsutil(object):
+    def __init__(self):
+        self.p = psutil
+        self.num_cpu = self.p.cpu_count()
+
+    def get_cpu_percent(self) -> List:
+        return self.p.cpu_percent(interval=1, percpu=True)
+
+    def get_metrics(self) -> Dict:
+        res = {}
+        cpu_percent = self.get_cpu_percent()
+        for index in range(0, self.num_cpu):
+            res["usage_cpu"+str(index)] = cpu_percent[index]
+        return res
+
