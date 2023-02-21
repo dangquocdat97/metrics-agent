@@ -22,7 +22,7 @@ class Agent(threading.Thread):
 
     def base_collect_metrics_for_prom(self):
         data = self.base.get_metrics()
-        print("cpu usage per core: ", data)
+        # print("cpu usage per core: ", data)
         for index in range(0, self.base.num_cpu):
             metric_name = "usage_cpu"+str(index)
             self.prom.prom_gauge.set(process_name="base", metric_name=metric_name,
@@ -39,18 +39,27 @@ class Agent(threading.Thread):
 
         # temporary demo for gauge metrics
         for metric in constant.LIST_METRICS:
-            callback_insert_metrics(prom=self.prom.prom_gauge, metric_name=metric.get("metric_name", ""),
-                                    desc=metric.get("desc", ""))
+            metric_name = metric.get("metric_name", "")
+            desc = metric.get("desc", "")
+            for sub_metric_name in metric_name:
+                callback_insert_metrics(prom=self.prom.prom_gauge, metric_name=sub_metric_name, desc=desc)
+            # if not isinstance(metric, List):
+            #     callback_insert_metrics(prom=self.prom.prom_gauge, metric_name=metric.get("metric_name", ""),
+            #                             desc=metric.get("desc", ""))
+            # else:
+            #     for sub_metric in metric:
+            #         callback_insert_metrics(prom=self.prom.prom_gauge, metric_name=sub_metric.get("metric_name", ""),
+            #                                 desc=sub_metric.get("desc", ""))
 
     # temporary hardcode for specific gauge metrics
     def proc_collect_metrics_for_prom(self, proc: ProcPsutil):
         data = self.proc_get_data_usage(proc)
         # print("set metrics for prometheus with proc : ", proc.name, data)
         for metric in constant.LIST_METRICS:
-            metric_name = metric.get("metric_name")
-            usage = data.get(metric_name, 0)
-
-            self.prom.prom_gauge.set(process_name=proc.name, metric_name=metric_name, value=usage)
+            metric_name = metric.get("metric_name", "")
+            for sub_metric_name in metric_name:
+                usage = data.get(sub_metric_name, 0)
+                self.prom.prom_gauge.set(process_name=proc.name, metric_name=sub_metric_name, value=usage)
 
     def proc_add_new_ins(self, proc: ProcPsutil):
         self.list_proc.append(proc)

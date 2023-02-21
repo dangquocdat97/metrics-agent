@@ -60,8 +60,11 @@ class PromGauge(PromBase):
     def set(self, process_name: str, metric_name: str, value: int = 1):
         metric_name = self._encode_metrics_name(process_name, metric_name)
         if self.is_metric_exist(metric_name) is True:
-            # print("set value for metrics: ", value)
+            print("set value for metrics {}: {}".format(metric_name, value))
             self.metrics[metric_name].set(value)
+
+        else:
+            print("metric name is not valid {}".format(metric_name))
 
 
 class Prom(object):

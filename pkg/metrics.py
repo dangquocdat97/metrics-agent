@@ -19,19 +19,35 @@ class ProcPsutil(object):
     def get_proc_status(self) -> str:
         return self.proc.status()
 
-    def get_proc_threads(self) -> int:
-        return self.proc.num_threads()
+    def get_proc_threads(self) -> dict:
+        return {constant.NUM_THREADS[0]: self.proc.num_threads()}
 
-    def get_proc_cpu_usage(self) -> float:
-        return self.proc.cpu_percent()
+    def get_proc_cpu_usage(self) -> dict:
+        return {constant.CPU_USAGE[0]: self.proc.cpu_percent()}
 
-    def get_proc_memory_usage(self) -> float:
-        return self.proc.memory_percent()
+    def get_proc_memory_usage(self) -> dict:
+        return {constant.MEM_USAGE[0]: self.proc.memory_percent()}
+
+    def get_io_counters(self):
+        try:
+            data = self.proc.io_counters()
+            return {"read_count":data[0], "write_count":data[1], "read_bytes":data[2], "write_bytes":data[3]}
+        except Exception as err:
+            print(err)
+            return {"read_count":0, "write_count":0, "read_bytes":0, "write_bytes":0}
 
     # get data of some specific metrics
     def get_metrics(self) -> Dict[str, float]:
-        return {constant.CPU_USAGE: self.get_proc_cpu_usage(), constant.MEM_USAGE: self.get_proc_memory_usage(),
-                constant.NUM_THREADS: self.get_proc_threads()}
+        res = {}
+        proc_thread = self.get_proc_threads()
+        io_counters = self.get_io_counters()
+        cpu = self.get_proc_cpu_usage()
+        mem = self.get_proc_memory_usage()
+        res.update(proc_thread)
+        res.update(cpu)
+        res.update(mem)
+        res.update(io_counters)
+        return res
 
 
 def create_psutil_provider(pid: int) -> psutil.Process:
