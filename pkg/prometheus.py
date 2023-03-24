@@ -50,7 +50,7 @@ class PromGauge(PromBase):
 
     @staticmethod
     def _create_metric(metric_name, description) -> Union[Counter, Gauge]:
-        return Gauge(name=metric_name, documentation=description, labelnames=["transaction"])
+        return Gauge(name=metric_name, documentation=description, labelnames=['transaction', 'type_metric'])
 
     def dec(self, process_name: str, metric_name: str, value: int = 1):
         metric_name = self._encode_metrics_name(process_name, metric_name)
@@ -64,8 +64,8 @@ class PromGauge(PromBase):
             print("set value for metrics {}: {}".format(metric_name, value))
             # self.metrics[metric_name].set(value)
             # test with labels
-            self.metrics[metric_name].labels("abc").set(value+10)
-            self.metrics[metric_name].labels("def").set(value)
+            self.metrics[metric_name].labels("abc", "ran1").set(value+10)
+            self.metrics[metric_name].labels("def", "ran2").set(value)
 
         else:
             print("metric name is not valid {}".format(metric_name))
