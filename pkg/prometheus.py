@@ -1,5 +1,5 @@
 from prometheus_client import Counter, Gauge,  start_http_server
-from typing import Dict,  Union
+from typing import Dict,  Union, List
 from pkg import constant
 
 
@@ -12,7 +12,7 @@ class PromBase(object):
         return constant.PROJECT_NAME+"_"+process_name+"_"+metric_type
 
     @staticmethod
-    def _create_metric(metric_name, description) -> Union[Counter, Gauge]:
+    def _create_metric(metric_name:str, description:str, labels: List) -> Union[Counter, Gauge]:
         pass
 
     def is_metric_exist(self, metric_name: str) -> bool:
@@ -20,17 +20,19 @@ class PromBase(object):
             return True
         return False
 
-    def insert_new_metric(self, process_name, metric_name, description: str):
+    def insert_new_metric(self, process_name, metric_name, description: str, labels: List=None):
+        if labels is None:
+            labels = []
         metric_name = self._encode_metrics_name(process_name, metric_name)
         if self.is_metric_exist(metric_name) is False:
-            self.metrics[metric_name] = self._create_metric(metric_name, description)
+            self.metrics[metric_name] = self._create_metric(metric_name, description, labels)
             return
         print("Metrics is existed")
 
-    def inc(self, process_name:str, metric_name: str, value: int):
+    def inc(self, process_name:str, metric_name: str, labels:List[str], value: int):
         metric_name = self._encode_metrics_name(process_name, metric_name)
         if self.is_metric_exist(metric_name) is True:
-            self.metrics[metric_name].inc(value)
+            self.metrics[metric_name].labels(label for label in labels).inc(value)
 
 
 class PromCount(PromBase):
@@ -39,8 +41,8 @@ class PromCount(PromBase):
         self.metrics: Dict[str, Counter] = {}
 
     @staticmethod
-    def _create_metric(metric_name, description) -> Union[Counter, Gauge]:
-        return Counter(name=metric_name, documentation=description, labelnames=["transaction"])
+    def _create_metric(metric_name: str, description: str, labels: List) -> Union[Counter, Gauge]:
+        return Counter(name=metric_name, documentation=description, labelnames=labels)
 
 
 class PromGauge(PromBase):
@@ -49,8 +51,8 @@ class PromGauge(PromBase):
         self.metrics: Dict[str, Gauge] = {}
 
     @staticmethod
-    def _create_metric(metric_name, description) -> Union[Counter, Gauge]:
-        return Gauge(name=metric_name, documentation=description, labelnames=['transaction', 'type_metric'])
+    def _create_metric(metric_name: str, description: str, labels: List) -> Union[Counter, Gauge]:
+        return Gauge(name=metric_name, documentation=description, labelnames=labels)
 
     def dec(self, process_name: str, metric_name: str, value: int = 1):
         metric_name = self._encode_metrics_name(process_name, metric_name)
@@ -58,14 +60,10 @@ class PromGauge(PromBase):
             self.metrics[metric_name].dec(value)
 
     def set(self, process_name: str, metric_name: str, value: int = 1):
-
         metric_name = self._encode_metrics_name(process_name, metric_name)
         if self.is_metric_exist(metric_name) is True:
-            print("set value for metrics {}: {}".format(metric_name, value))
-            # self.metrics[metric_name].set(value)
-            # test with labels
-            self.metrics[metric_name].labels("abc", "ran1").set(value+10)
-            self.metrics[metric_name].labels("def", "ran2").set(value)
+            # print("set value for metrics {}: {}".format(metric_name, value))
+            self.metrics[metric_name].set(value)
 
         else:
             print("metric name is not valid {}".format(metric_name))
